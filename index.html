@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Le Saint Coran en Ligne</title>
-  <!-- Police arabe élégante et police française moderne -->
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #1b4d3e;
-      --bg: #f7f9f8;
+      --primary-light: #f0f7f4;
+      --bg: #f8f9fa;
       --card-bg: #ffffff;
       --text-dark: #2c3e50;
       --text-muted: #6c757d;
@@ -22,52 +22,95 @@
       font-family: 'Inter', sans-serif;
       background-color: var(--bg);
       color: var(--text-dark);
-      display: flex;
-      min-height: 100vh;
+      padding-bottom: 40px;
     }
 
-    /* Barre latérale (Liste des Sourates) */
-    sidebar {
-      width: 280px;
-      background: var(--card-bg);
-      border-right: 1px solid var(--border);
-      height: 100vh;
-      overflow-y: auto;
-      position: fixed;
-      left: 0; top: 0;
-    }
-
-    .sidebar-header {
-      padding: 20px;
+    /* En-tête fixe */
+    header {
       background: var(--primary);
       color: white;
-      font-weight: 600;
       text-align: center;
+      padding: 18px 15px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+    header h1 { font-size: 1.3rem; font-weight: 600; }
 
-    .surah-list { list-style: none; }
-    .surah-item {
-      padding: 12px 20px;
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: background 0.2s;
-    }
-    .surah-item:hover, .surah-item.active {
-      background: #f0f7f4;
-      color: var(--primary);
-      font-weight: 600;
-    }
-
-    /* Zone principale de lecture */
-    main {
-      margin-left: 280px;
-      flex: 1;
-      padding: 40px 20px;
+    .container {
       max-width: 900px;
-      margin-right: auto;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+
+    /* Vue 1: Grille des Sourates */
+    .surah-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .surah-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .surah-card:hover, .surah-card:active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      transform: translateY(-2px);
+    }
+
+    .surah-num {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .surah-name-ar {
+      font-family: 'Amiri', serif;
+      font-size: 1.4rem;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .surah-name-fr {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Vue 2: Lecture de la Sourate (Cachée par défaut) */
+    #reader-view {
+      display: none;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--primary);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
     }
 
     .surah-title-box {
@@ -75,33 +118,33 @@
       background: var(--card-bg);
       padding: 25px;
       border-radius: 12px;
-      margin-bottom: 30px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      margin-bottom: 25px;
       border: 1px solid var(--border);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
     }
-    .surah-title-ar {
+
+    .surah-title-box h2 {
       font-family: 'Amiri', serif;
-      font-size: 2.2rem;
+      font-size: 2.4rem;
       color: var(--primary);
       margin-bottom: 5px;
     }
 
-    /* Versets */
+    /* Carte de chaque verset */
     .ayah-card {
       background: var(--card-bg);
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 20px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       border: 1px solid var(--border);
       box-shadow: 0 2px 5px rgba(0,0,0,0.02);
     }
 
     .ayah-header {
-      display: flex;
-      justify-content: space-between;
       color: var(--text-muted);
-      font-size: 0.85rem;
-      margin-bottom: 15px;
+      font-size: 0.8rem;
+      margin-bottom: 12px;
+      font-weight: 500;
     }
 
     .ayah-arabic {
@@ -109,103 +152,123 @@
       font-size: 1.8rem;
       text-align: right;
       direction: rtl;
-      line-height: 2.2;
+      line-height: 2.3;
       color: #111;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
 
     .ayah-translation {
-      font-size: 1rem;
+      font-size: 0.98rem;
       color: #333;
       line-height: 1.6;
-    }
-
-    /* Responsive mobile */
-    @media (max-width: 768px) {
-      body { flex-direction: column; }
-      sidebar { width: 100%; height: auto; position: relative; }
-      main { margin-left: 0; padding: 20px 10px; }
     }
   </style>
 </head>
 <body>
 
-  <sidebar>
-    <div class="sidebar-header">Le Saint Coran</div>
-    <ul class="surah-list" id="surah-list">
-      <!-- Généré automatiquement -->
-    </ul>
-  </sidebar>
+  <header>
+    <h1>Le Saint Coran</h1>
+  </header>
 
-  <main>
-    <div class="surah-title-box">
-      <h1 class="surah-title-ar" id="surah-name-ar">Chargement...</h1>
-      <p id="surah-name-fr"></p>
+  <div class="container">
+    <!-- Vue 1: Liste des Sourates -->
+    <div id="grid-view">
+      <div class="surah-grid" id="surah-grid">
+        <p style="grid-column: 1/-1; text-align: center;">Chargement des sourates...</p>
+      </div>
     </div>
 
-    <div id="quran-container">
-      <!-- Les versets s'afficheront ici -->
+    <!-- Vue 2: Lecture de la Sourate sélectionnée -->
+    <div id="reader-view">
+      <button class="back-btn" onclick="showGridView()">⬅️ Choisir une autre sourate</button>
+      
+      <div class="surah-title-box">
+        <h2 id="surah-name-ar">...</h2>
+        <p id="surah-name-fr" style="color: var(--text-muted); margin-top: 5px;"></p>
+      </div>
+
+      <div id="quran-container">
+        <!-- Les versets apparaissent ici -->
+      </div>
     </div>
-  </main>
+  </div>
 
   <script>
-    const surahListEl = document.getElementById('surah-list');
+    const gridView = document.getElementById('grid-view');
+    const readerView = document.getElementById('reader-view');
+    const surahGridEl = document.getElementById('surah-grid');
     const quranContainer = document.getElementById('quran-container');
     const surahNameAr = document.getElementById('surah-name-ar');
     const surahNameFr = document.getElementById('surah-name-fr');
 
-    // 1. Charger la liste des 114 sourates
-    async function loadSurahList() {
-      const res = await fetch('https://api.alquran.cloud/v1/surah');
-      const data = await res.json();
-      
-      surahListEl.innerHTML = '';
-      data.data.forEach(surah => {
-        const li = document.createElement('li');
-        li.className = `surah-item ${surah.number === 78 ? 'active' : ''}`;
-        li.innerHTML = `<span>${surah.number}. ${surah.englishName}</span> <span>${surah.name}</span>`;
-        li.onclick = () => {
-          document.querySelectorAll('.surah-item').forEach(el => el.classList.remove('active'));
-          li.classList.add('active');
-          loadSurah(surah.number);
-        };
-        surahListEl.appendChild(li);
-      });
+    // 1. Charger la liste des 114 sourates sous forme de cartes
+    async function loadSurahGrid() {
+      try {
+        const res = await fetch('https://api.alquran.cloud/v1/surah');
+        const data = await res.json();
+        
+        surahGridEl.innerHTML = '';
+        data.data.forEach(surah => {
+          const card = document.createElement('div');
+          card.className = 'surah-card';
+          card.innerHTML = `
+            <span class="surah-num">${surah.number}</span>
+            <div class="surah-name-ar">${surah.name}</div>
+            <div class="surah-name-fr">${surah.englishName}</div>
+          `;
+          card.onclick = () => loadSurah(surah.number);
+          surahGridEl.appendChild(card);
+        });
+      } catch (err) {
+        surahGridEl.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:red;">Erreur de chargement. Veuillez rafraîchir.</p>';
+      }
     }
 
-    // 2. Charger le texte arabe et la traduction d'une sourate
+    // 2. Charger et afficher une sourate
     async function loadSurah(surahNumber) {
-      quranContainer.innerHTML = '<p style="text-align:center;">Chargement de la sourate...</p>';
+      // Masquer la grille et afficher la vue de lecture
+      gridView.style.display = 'none';
+      readerView.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      quranContainer.innerHTML = '<p style="text-align:center; padding: 40px;">Chargement de la sourate...</p>';
       
-      // Récupération simultanée de l'arabe (quran-uthmani) et du français (fr.hamidullah)
-      const res = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/editions/quran-uthmani,fr.hamidullah`);
-      const data = await res.json();
+      try {
+        const res = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/editions/quran-uthmani,fr.hamidullah`);
+        const data = await res.json();
 
-      const arabicAyahs = data.data[0].ayahs;
-      const frenchAyahs = data.data[1].ayahs;
+        const arabicAyahs = data.data[0].ayahs;
+        const frenchAyahs = data.data[1].ayahs;
 
-      surahNameAr.textContent = data.data[0].name;
-      surahNameFr.textContent = `${data.data[0].englishNameTranslation} (${data.data[0].numberOfAyahs} versets)`;
+        surahNameAr.textContent = data.data[0].name;
+        surahNameFr.textContent = `${data.data[0].englishNameTranslation} (${data.data[0].numberOfAyahs} versets)`;
 
-      quranContainer.innerHTML = '';
+        quranContainer.innerHTML = '';
 
-      arabicAyahs.forEach((ayah, index) => {
-        const card = document.createElement('div');
-        card.className = 'ayah-card';
-        card.innerHTML = `
-          <div class="ayah-header">
-            <span>Verset ${ayah.numberInSurah}</span>
-          </div>
-          <div class="ayah-arabic">${ayah.text} ﴿${ayah.numberInSurah}﴾</div>
-          <div class="ayah-translation">${frenchAyahs[index].text}</div>
-        `;
-        quranContainer.appendChild(card);
-      });
+        arabicAyahs.forEach((ayah, index) => {
+          const card = document.createElement('div');
+          card.className = 'ayah-card';
+          card.innerHTML = `
+            <div class="ayah-header">Verset ${ayah.numberInSurah}</div>
+            <div class="ayah-arabic">${ayah.text} ﴿${ayah.numberInSurah}﴾</div>
+            <div class="ayah-translation">${frenchAyahs[index].text}</div>
+          `;
+          quranContainer.appendChild(card);
+        });
+      } catch (err) {
+        quranContainer.innerHTML = '<p style="text-align:center; color:red;">Erreur de chargement du texte.</p>';
+      }
     }
 
-    // Initialisation : Charger la liste et afficher la Sourate 78 (An-Naba) par défaut
-    loadSurahList();
-    loadSurah(78);
+    // 3. Revenir à la grille des sourates
+    function showGridView() {
+      readerView.style.display = 'none';
+      gridView.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Initialisation
+    loadSurahGrid();
   </script>
 </body>
 </html>
