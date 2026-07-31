@@ -1,19 +1,18 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Le Saint Coran - المصحف الشريف</title>
+  <title>القرآن الكريم</title>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #1b4d3e;
       --primary-light: #f0f7f4;
-      --bg: #ece9e2; /* Couleur papier/manuscrit en fond */
-      --card-bg: #ffffff;
-      --text-dark: #2c3e50;
-      --text-muted: #6c757d;
-      --border: #dcd6cd;
+      --bg: #e6dfd3; /* Fond couleur papier Mushaf */
+      --card-bg: #fffcf7;
+      --text-dark: #111111;
+      --border: #c8b9a6;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,7 +36,7 @@
     }
     header h1 {
       font-family: 'Amiri', serif;
-      font-size: 1.6rem;
+      font-size: 1.7rem;
       font-weight: 700;
     }
 
@@ -52,10 +51,11 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
       gap: 10px;
+      direction: ltr;
     }
 
     .surah-card {
-      background: var(--card-bg);
+      background: #ffffff;
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 14px;
@@ -91,10 +91,9 @@
       font-weight: 700;
     }
 
-    /* Vue 2: Mode Page Mushaf */
+    /* Vue 2: Mode Page Mushaf Texte */
     #reader-view {
       display: none;
-      text-align: center;
     }
 
     .nav-bar {
@@ -102,10 +101,11 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 15px;
+      direction: ltr;
     }
 
     .back-btn {
-      background: var(--card-bg);
+      background: #ffffff;
       border: 1px solid var(--border);
       color: var(--primary);
       padding: 8px 16px;
@@ -115,28 +115,46 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.03);
     }
 
-    .page-title {
+    .surah-title {
       font-family: 'Amiri', serif;
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       color: var(--primary);
       font-weight: bold;
     }
 
-    /* Conteneur des images de pages du Mushaf */
-    .mushaf-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 15px;
+    /* Style encadré style Mushaf */
+    .mushaf-frame {
+      background: var(--card-bg);
+      border: 3px double var(--primary);
+      border-radius: 12px;
+      padding: 25px 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
     }
 
-    .mushaf-page {
-      width: 100%;
-      max-width: 550px; /* Taille optimale pour ne pas sur-zoomer */
-      height: auto;
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-      background: white;
+    .basmala {
+      font-family: 'Amiri', serif;
+      font-size: 1.8rem;
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .mushaf-text {
+      font-family: 'Amiri', serif;
+      font-size: 1.7rem;
+      text-align: justify;
+      direction: rtl;
+      line-height: 2.4;
+      color: #1a1a1a;
+    }
+
+    .verse-symbol {
+      color: var(--primary);
+      font-weight: bold;
+      margin: 0 6px;
+      font-size: 1.4rem;
+      display: inline-block;
     }
   </style>
 </head>
@@ -154,15 +172,18 @@
       </div>
     </div>
 
-    <!-- Vue 2: Visualiseur de pages du Mushaf -->
+    <!-- Vue 2: Lecture style Mushaf -->
     <div id="reader-view">
       <div class="nav-bar">
         <button class="back-btn" onclick="showGridView()">⬅️ القائمة (Retour)</button>
-        <div class="page-title" id="surah-title">...</div>
+        <div class="surah-title" id="surah-title">...</div>
       </div>
 
-      <div class="mushaf-container" id="mushaf-pages">
-        <!-- Les pages du Mushaf s'afficheront ici -->
+      <div class="mushaf-frame">
+        <div class="basmala" id="basmala">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
+        <div class="mushaf-text" id="mushaf-text">
+          <!-- Le texte s'affichera ici -->
+        </div>
       </div>
     </div>
   </div>
@@ -171,10 +192,11 @@
     const gridView = document.getElementById('grid-view');
     const readerView = document.getElementById('reader-view');
     const surahGridEl = document.getElementById('surah-grid');
-    const mushafPagesEl = document.getElementById('mushaf-pages');
+    const mushafTextEl = document.getElementById('mushaf-text');
     const surahTitleEl = document.getElementById('surah-title');
+    const basmalaEl = document.getElementById('basmala');
 
-    // 1. Charger la liste des 114 sourates avec le numéro de page où elle commence
+    // 1. Charger la liste des sourates
     async function loadSurahGrid() {
       try {
         const res = await fetch('https://api.alquran.cloud/v1/surah');
@@ -188,7 +210,7 @@
             <span class="surah-num">${surah.number}</span>
             <div class="surah-name-ar">${surah.name}</div>
           `;
-          card.onclick = () => loadSurahPages(surah.number);
+          card.onclick = () => loadSurahText(surah.number);
           surahGridEl.appendChild(card);
         });
       } catch (err) {
@@ -196,43 +218,41 @@
       }
     }
 
-    // 2. Charger les pages réelles du Mushaf correspondant à la sourate
-    async function loadSurahPages(surahNumber) {
+    // 2. Charger le texte de la sourate
+    async function loadSurahText(surahNumber) {
       gridView.style.display = 'none';
       readerView.style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
-      mushafPagesEl.innerHTML = '<p style="padding:30px;">جاري تحميل صفحات المصحف...</p>';
+      mushafTextEl.innerHTML = '<p style="text-align:center; padding: 20px;">جاري التحميل...</p>';
+
+      // Masquer la Basmala pour Al-Fatiha (1) et At-Tawbah (9)
+      if (surahNumber === 1 || surahNumber === 9) {
+        basmalaEl.style.display = 'none';
+      } else {
+        basmalaEl.style.display = 'block';
+      }
 
       try {
         const res = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}`);
         const data = await res.json();
-        
+
         surahTitleEl.textContent = data.data.name;
 
-        // Récupérer les numéros de pages occupées par la sourate
-        const pages = [...new Set(data.data.ayahs.map(ayah => ayah.page))];
-        
-        mushafPagesEl.innerHTML = '';
-
-        pages.forEach(pageNo => {
-          const img = document.createElement('img');
-          img.className = 'mushaf-page';
-          // Récupère l'image haute qualité de la page du Mushaf de Médine
-          img.src = `https://quran-images-api.vercel.app/images/page/${pageNo}.png`;
-          img.alt = `Page ${pageNo}`;
-          img.loading = "lazy";
-          
-          // Solution de secours si l'API d'image principale a un problème
-          img.onerror = function() {
-            this.src = `https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/images/pages/page_${pageNo}.jpg`;
-          };
-
-          mushafPagesEl.appendChild(img);
+        let html = '';
+        data.data.ayahs.forEach(ayah => {
+          let text = ayah.text;
+          // Retirer la basmala automatique du début du premier verset si présente
+          if (surahNumber !== 1 && ayah.numberInSurah === 1 && text.startsWith("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ")) {
+            text = text.replace("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ", "");
+          }
+          html += `${text} <span class="verse-symbol">﴿${ayah.numberInSurah}﴾</span> `;
         });
 
+        mushafTextEl.innerHTML = html;
+
       } catch (err) {
-        mushafPagesEl.innerHTML = '<p style="color:red;">Erreur lors du chargement des pages.</p>';
+        mushafTextEl.innerHTML = '<p style="color:red; text-align:center;">Erreur lors du chargement.</p>';
       }
     }
 
